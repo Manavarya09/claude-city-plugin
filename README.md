@@ -1,4 +1,4 @@
-# Code City Plugin
+# Claude City Plugin
 
 **Claude Code plugin that visualizes your current project as a 3D city.**
 
@@ -7,7 +7,7 @@ Run `/city` in Claude Code → your codebase appears as a navigable 3D city in y
 ## Install
 
 ```bash
-git clone https://github.com/Manavarya09/code-city-plugin.git ~/.claude/plugins/code-city-plugin
+git clone https://github.com/Manavarya09/claude-city-plugin.git ~/.claude/plugins/code-city-plugin
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ In any project with Claude Code:
 
 ## Also See
 
-- **[Claude City](https://github.com/Manavarya09/claude-city)** — Web app version (paste any GitHub repo)
+- **[Code City](https://github.com/Manavarya09/code-city)** — Web app version (paste any GitHub repo)
 - **[Cost Guardian](https://github.com/Manavarya09/cost-guardian)** — Cost tracking for Claude Code
 - **[Team Brain](https://github.com/Manavarya09/team-brain)** — Shared AI memory for teams
 

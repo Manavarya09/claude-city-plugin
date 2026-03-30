@@ -1,8 +1,8 @@
 {
-  "name": "code-city-plugin-marketplace",
+  "name": "claude-city-plugin-marketplace",
   "owner": { "name": "Manavarya Singh", "url": "https://github.com/Manavarya09" },
   "plugins": [{
-    "name": "code-city-plugin",
+    "name": "claude-city-plugin",
     "source": "./",
     "description": "Visualize your project as a 3D city. Launch with /city.",
     "version": "1.0.0",

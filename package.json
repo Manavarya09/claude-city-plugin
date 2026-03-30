@@ -1,9 +1,9 @@
 {
-  "name": "code-city-plugin",
+  "name": "claude-city-plugin",
   "version": "1.0.0",
   "description": "Claude Code plugin: visualize your project as a 3D city with /city",
   "scripts": { "city": "node scripts/analyze.js . && node scripts/server.js" },
   "author": "Manavarya Singh",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/Manavarya09/code-city-plugin.git" }
+  "repository": { "type": "git", "url": "https://github.com/Manavarya09/claude-city-plugin.git" }
 }
