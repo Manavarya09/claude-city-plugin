@@ -1,0 +1,13 @@
+{
+  "name": "code-city-plugin-marketplace",
+  "owner": { "name": "Manavarya Singh", "url": "https://github.com/Manavarya09" },
+  "plugins": [{
+    "name": "code-city-plugin",
+    "source": "./",
+    "description": "Visualize your project as a 3D city. Launch with /city.",
+    "version": "1.0.0",
+    "author": { "name": "Manavarya Singh" },
+    "category": "visualization",
+    "tags": ["3d", "city", "visualization"]
+  }]
+}

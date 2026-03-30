@@ -1,0 +1,11 @@
+{
+  "name": "code-city-plugin",
+  "description": "Visualize your current project as a 3D city in the browser. Files become buildings, folders become districts, bugs become fires. Launch with /city.",
+  "version": "1.0.0",
+  "author": { "name": "Manavarya Singh", "url": "https://github.com/Manavarya09" },
+  "homepage": "https://github.com/Manavarya09/code-city-plugin",
+  "repository": "https://github.com/Manavarya09/code-city-plugin",
+  "license": "MIT",
+  "keywords": ["3d", "visualization", "city", "codebase"],
+  "skills": "./skills/"
+}

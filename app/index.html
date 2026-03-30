@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code City — Your Project in 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { overflow: hidden; background: #f0a070; font-family: 'Inter', sans-serif; }
+  canvas { display: block; }
+  #loading {
+    position: fixed; inset: 0; background: linear-gradient(135deg, #1a1a2e, #16213e); z-index: 1000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #fff; transition: opacity 0.5s;
+  }
+  #loading.hide { opacity: 0; pointer-events: none; }
+  #loading h1 { font-size: 32px; margin-bottom: 8px; }
+  #loading p { color: #8899bb; font-size: 14px; }
+  .loader { width: 40px; height: 40px; border: 3px solid #222; border-top-color: #ff6b35;
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin: 20px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #top-bar {
+    position: fixed; top: 0; left: 0; right: 0; height: 48px; z-index: 100;
+    background: rgba(255,255,255,0.88); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+  }
+  .top-left { display: flex; align-items: center; gap: 20px; }
+  .city-name { color: #1a1a2e; font-size: 16px; font-weight: 700; }
+  .stat { color: #888; font-size: 12px; }
+  .stat strong { color: #333; }
+  .top-right { display: flex; gap: 8px; }
+  .ctrl-btn {
+    background: #f0f2f5; border: 1px solid #ddd; border-radius: 8px;
+    color: #555; font-size: 15px; padding: 6px 10px; cursor: pointer;
+  }
+  .ctrl-btn:hover { background: #e4e8ec; }
+  #tooltip {
+    position: fixed; z-index: 200; background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+    border: 1px solid #ddd; border-radius: 10px; padding: 14px 18px;
+    pointer-events: none; max-width: 300px; box-shadow: 0 4px 24px rgba(0,0,0,0.12); display: none;
+  }
+  .tt-name { color: #1a1a2e; font-size: 15px; font-weight: 700; }
+  .tt-path { color: #888; font-size: 11px; margin-bottom: 8px; word-break: break-all; }
+  .tt-row { display: flex; justify-content: space-between; color: #666; font-size: 12px; margin: 3px 0; }
+  .tt-row strong { color: #222; }
+  .tt-test { color: #22883a; font-size: 11px; margin-top: 6px; }
+  .tt-bug { color: #d03030; font-size: 11px; }
+  #legend {
+    position: fixed; bottom: 16px; left: 16px; z-index: 100;
+    background: rgba(255,255,255,0.88); backdrop-filter: blur(8px);
+    border: 1px solid #ddd; border-radius: 10px; padding: 14px 18px;
+  }
+  .legend-title { color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 8px; }
+  .legend-item { color: #555; font-size: 12px; display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  #activity-feed {
+    position: fixed; bottom: 16px; right: 16px; z-index: 100;
+    background: rgba(255,255,255,0.88); backdrop-filter: blur(8px);
+    border: 1px solid #ddd; border-radius: 10px; padding: 14px 18px;
+    max-width: 300px; max-height: 220px; overflow-y: auto;
+  }
+  .feed-title { color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 8px; }
+  .feed-item { color: #555; font-size: 11px; padding: 4px 0; border-bottom: 1px solid #eee; }
+  .feed-item:last-child { border-bottom: none; }
+  .feed-author { font-weight: 600; color: #333; }
+  #help-text {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 100;
+    color: rgba(0,0,0,0.3); font-size: 11px; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="loading"><h1>Code City</h1><p>Building your project...</p><div class="loader"></div></div>
+<div id="top-bar"><div class="top-left"></div><div class="top-right"></div></div>
+<div id="tooltip"></div>
+<div id="legend"></div>
+<div id="activity-feed"></div>
+<div id="help-text">Click building · Scroll zoom · Drag rotate · R reset</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.170.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { City } from './city.js';
+import { AgentManager } from './agents.js';
+import { EffectsManager } from './effects.js';
+import { CityControls } from './controls.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.4;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf0a070);
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 600);
+
+const data = await fetch('./city-data.json').then(r => r.json());
+
+const city = new City(scene, data);
+city.build();
+
+const effects = new EffectsManager(scene);
+effects.createAtmosphere();
+effects.addBugFires(city.buildings);
+effects.addNewFeatureSparkles(city.buildings);
+
+const agents = new AgentManager(scene, city);
+for (let i = 0; i < Math.min((data.contributors || []).length, 6); i++) {
+  const agent = agents.createAgent(i, data.contributors[i].name);
+  if (city.buildings.length > 0) agents.setTarget(agent, city.buildings[Math.floor(Math.random() * city.buildings.length)].data.path);
+}
+
+const controls = new CityControls(camera, renderer, city, data);
+controls.bindButtons(effects);
+
+document.getElementById('loading').classList.add('hide');
+
+const clock = new THREE.Clock();
+(function animate() {
+  requestAnimationFrame(animate);
+  const delta = Math.min(clock.getDelta(), 0.05);
+  const time = clock.getElapsedTime();
+  city.update(time); effects.update(time, delta); agents.update(time, delta); controls.update();
+  renderer.render(scene, camera);
+})();
+</script>
+</body>
+</html>
