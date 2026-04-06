@@ -245,15 +245,22 @@ function analyze(repoPath) {
   const absPath = path.resolve(repoPath);
   const name = path.basename(absPath);
 
+  if (!name) {
+    throw new Error('Could not determine repository name from path: ' + repoPath);
+  }
+
   console.error(`Analyzing ${name}...`);
 
+  // Check if this is a git repo; skip git analysis if not
+  const isGitRepo = fs.existsSync(path.join(absPath, '.git'));
+
   console.error('  Parsing git history...');
-  const churn = getFileChurn(absPath);
-  const authors = getLastAuthors(absPath);
-  const bugs = getBuggyFiles(absPath);
-  const activity = getRecentActivity(absPath);
-  const contributors = getContributors(absPath);
-  const commits = getCommitCount(absPath);
+  const churn = isGitRepo ? getFileChurn(absPath) : {};
+  const authors = isGitRepo ? getLastAuthors(absPath) : {};
+  const bugs = isGitRepo ? getBuggyFiles(absPath) : {};
+  const activity = isGitRepo ? getRecentActivity(absPath) : [];
+  const contributors = isGitRepo ? getContributors(absPath) : [];
+  const commits = isGitRepo ? getCommitCount(absPath) : 0;
 
   console.error('  Scanning file tree...');
   const tree = buildTree(absPath, absPath, churn, authors, bugs) || [];
@@ -297,9 +304,45 @@ if (require.main === module) {
   const repoPath = process.argv[2] || '.';
   const outputPath = process.argv[3] || path.join(__dirname, '..', 'app', 'city-data.json');
 
+  // Validate that the repo path exists and is a directory
+  const absRepoPath = path.resolve(repoPath);
+  if (!fs.existsSync(absRepoPath)) {
+    console.error(`Error: path does not exist: ${absRepoPath}`);
+    process.exit(1);
+  }
+
+  let stat;
+  try { stat = fs.statSync(absRepoPath); } catch (err) {
+    console.error(`Error: cannot access path: ${absRepoPath} (${err.message})`);
+    process.exit(1);
+  }
+  if (!stat.isDirectory()) {
+    console.error(`Error: path is not a directory: ${absRepoPath}`);
+    process.exit(1);
+  }
+
+  // Warn (non-fatal) if the path is not a git repository
+  const gitDir = path.join(absRepoPath, '.git');
+  if (!fs.existsSync(gitDir)) {
+    console.error(`Warning: ${absRepoPath} does not appear to be a git repository. Git metrics will be empty.`);
+  }
+
   const data = analyze(repoPath);
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
+
+  // Validate that the analysis produced at least some files
+  const fileCount = data.stats?.files || 0;
+  if (fileCount === 0) {
+    console.error('Warning: no source files were found. The city will be empty.');
+    console.error('  Make sure the path contains source code files and is not excluded by SKIP_DIRS.');
+  }
+
+  try {
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+    fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error(`Error: failed to write output file: ${outputPath} (${err.message})`);
+    process.exit(1);
+  }
   console.error(`Output: ${outputPath}`);
 }
 
