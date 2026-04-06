@@ -1,3 +1,18 @@
 node_modules/
 .DS_Store
+Thumbs.db
+
+# Generated analysis output
 city-data.json
+app/city-data.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
