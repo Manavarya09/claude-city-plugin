@@ -53,8 +53,23 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
-  const url = `http://localhost:${PORT}`;
+// Validate port
+const port = parseInt(PORT, 10);
+if (isNaN(port) || port < 0 || port > 65535) {
+  console.error(`\n  Error: Invalid port "${PORT}". Must be a number between 0 and 65535.\n`);
+  process.exit(1);
+}
+
+// Check that city-data.json exists before starting the server
+const dataFile = path.join(APP_DIR, 'city-data.json');
+if (!fs.existsSync(dataFile)) {
+  console.error('\n  Error: city-data.json not found. Run the analyzer first:');
+  console.error('    node scripts/analyze.js <project-path>\n');
+  process.exit(1);
+}
+
+server.listen(port, () => {
+  const url = `http://localhost:${port}`;
   console.log(`\n  Claude City running at ${url}\n`);
 
   // Open in browser
@@ -66,9 +81,27 @@ server.listen(PORT, () => {
   } catch {}
 });
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n  Error: Port ${port} is already in use.`);
+    console.error(`  Try a different port: node scripts/server.js <port>\n`);
+  } else if (err.code === 'EACCES') {
+    console.error(`\n  Error: Permission denied for port ${port}.`);
+    console.error(`  Try a port above 1024 or run with elevated permissions.\n`);
+  } else {
+    console.error(`\n  Server error: ${err.message}\n`);
+  }
+  process.exit(1);
+});
+
 // Graceful shutdown
 process.on('SIGINT', () => {
   console.log('\n  City shutting down...\n');
+  server.close();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
   server.close();
   process.exit(0);
 });
