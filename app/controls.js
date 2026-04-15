@@ -46,6 +46,7 @@ export class CityControls {
       <span class="stat"><strong>${this.data.stats?.contributors || 0}</strong> devs${starsText}</span>
     `;
     topBar.querySelector('.top-right').innerHTML = `
+      <button id="btn-toggle-heatmap" class="ctrl-btn" title="Toggle risk heatmap">🗺️</button>
       <button id="btn-toggle-fires" class="ctrl-btn" title="Toggle fires">🔥</button>
       <button id="btn-toggle-roads" class="ctrl-btn" title="Toggle roads">🛣️</button>
       <button id="btn-rocket" class="ctrl-btn" title="Launch rocket">🚀</button>
@@ -173,6 +174,11 @@ export class CityControls {
 
   // Expose for external button binding
   bindButtons(effects) {
+    this._heatmapOn = false;
+    document.getElementById('btn-toggle-heatmap')?.addEventListener('click', () => {
+      this._heatmapOn = !this._heatmapOn;
+      this.city.setColorMode(this._heatmapOn ? 'heatmap' : 'language');
+    });
     document.getElementById('btn-toggle-fires')?.addEventListener('click', () => {
       effects.group.visible = !effects.group.visible;
     });
