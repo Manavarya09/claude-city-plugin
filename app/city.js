@@ -20,6 +20,17 @@ const BUILDING_COLORS = [
   0xbfc9ce, // light grey
 ];
 
+// Blue-to-red gradient for risk heatmap (0.0 = low risk blue, 1.0 = high risk red)
+function riskColor(churn, bugCount, loc) {
+  const safeLoc = Math.max(loc || 1, 1);
+  const score = ((churn || 0) * (bugCount || 0)) / safeLoc;
+  const t = Math.min(score / 2, 1); // normalize — score of 2+ maps to max red
+  const r = Math.round(60 + t * 195);
+  const g = Math.round(60 + (1 - Math.abs(t - 0.5) * 2) * 100);
+  const b = Math.round(200 - t * 170);
+  return (r << 16) | (g << 8) | b;
+}
+
 export class City {
   constructor(scene, data) {
     this.scene = scene;
@@ -375,6 +386,26 @@ export class City {
         new THREE.Vector3(to.x, 0.2, to.z)
       );
       this.roadGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(12)), mat));
+    }
+  }
+
+  setColorMode(mode) {
+    this.colorMode = mode;
+    const langColors = {
+      typescript: 0x6b9ac4, javascript: 0xe8c840, python: 0x5a8fa8,
+      rust: 0xc8855a, go: 0x5abfcf, java: 0xb07830,
+      ruby: 0xa85050, css: 0x9070b8, html: 0xd06030,
+      shell: 0x80b850, json: 0x60c088, markdown: 0x8090b0,
+    };
+    for (const b of this.buildings) {
+      const d = b.mesh.userData;
+      let color;
+      if (mode === 'heatmap') {
+        color = riskColor(d.churn, d.bug_count, d.loc);
+      } else {
+        color = langColors[d.language] || BUILDING_COLORS[Math.floor(Math.random() * BUILDING_COLORS.length)];
+      }
+      b.mesh.material.color.setHex(color);
     }
   }
 
