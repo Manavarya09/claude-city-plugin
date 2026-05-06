@@ -1,5 +1,11 @@
 # Claude City Plugin
 
+[![License: MIT](https://img.shields.io/github/license/Manavarya09/claude-city-plugin?color=0a0a0a)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/Manavarya09/claude-city-plugin?style=flat&color=0a0a0a)](https://github.com/Manavarya09/claude-city-plugin/stargazers)
+[![Issues](https://img.shields.io/github/issues/Manavarya09/claude-city-plugin?color=0a0a0a)](https://github.com/Manavarya09/claude-city-plugin/issues)
+[![Last commit](https://img.shields.io/github/last-commit/Manavarya09/claude-city-plugin?color=0a0a0a)](https://github.com/Manavarya09/claude-city-plugin/commits/main)
+
+
 **Claude Code plugin that visualizes your current project as a 3D city.**
 
 Run `/city` in Claude Code → your codebase appears as a navigable 3D city in your browser.
