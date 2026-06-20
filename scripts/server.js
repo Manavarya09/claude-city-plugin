@@ -23,7 +23,7 @@ const server = http.createServer((req, res) => {
   let filePath = path.join(APP_DIR, req.url === '/' ? 'index.html' : req.url);
 
   // Security: prevent directory traversal
-  if (!filePath.startsWith(APP_DIR)) {
+  if (filePath !== APP_DIR && !filePath.startsWith(APP_DIR + path.sep)) {
     res.writeHead(403);
     res.end('Forbidden');
     return;
